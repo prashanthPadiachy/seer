@@ -51,4 +51,27 @@ public class PlayerMovementStats : ScriptableObject
     public bool DrawRight = true;
     [Range(5, 100)] public int ArcResolution = 20;
     [Range(0, 500)] public int VisualizationSteps = 90;
+
+    public float Gravity { get; private set; }
+    public float InitialJumpVelocity { get; private set; }
+    public float AdjustedJumpHeight { get; private set; }//alt of adjusting timestep for acc
+    private void OnValidate() 
+    {
+        CalculateValues();
+    }
+
+    private void OnEnable()
+    {
+        CalculateValues();
+    }
+
+    private void CalculateValues() 
+    {
+        AdjustedJumpHeight = JumpHeight * JumpHeightCompensationFactor;
+        Gravity = -(2f * AdjustedJumpHeight) / Mathf.Pow(TimeTillJumpApex, 2f);
+        InitialJumpVelocity = Mathf.Abs(Gravity)*TimeTillJumpApex;
+    }
+
+
+
 }
