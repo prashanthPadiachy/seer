@@ -1,4 +1,6 @@
 using UnityEngine;
+using static UnityEngine.LightAnchor;
+using UnityEngine.EventSystems;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -36,6 +38,14 @@ public class PlayerMovement : MonoBehaviour
 
     private float _cototeTimer;
 
+    private float _moveSpeed;
+
+    public Vector2 GravityDirection { get; private set; } = Vector2.down;
+
+    private Vector2 UpDirection => -GravityDirection;
+
+    private Vector2 MoveDirection =>
+        new Vector2(-GravityDirection.y, GravityDirection.x);
     private void Awake()
     {
         _isFacingRight = true;
@@ -62,25 +72,45 @@ public class PlayerMovement : MonoBehaviour
             Move(MoveStats.AirAcceleration, MoveStats.AirDeceleration, InputManager.Movement);
         }
     }
-    private void Move(float acceleration, float deceleration, Vector2 moveInput) 
+    private void Move(float acceleration, float deceleration, Vector2 moveInput)
     {
+        float targetSpeed = 0f;
+
         if (moveInput != Vector2.zero)
         {
             TurnCheck(moveInput);
-            Vector2 targetVelocity = Vector2.zero;
-            if (InputManager.RunIsHeld)
-            {
-                targetVelocity = new Vector2(moveInput.x, 0f) * MoveStats.MaxRunSpeed;
-            }
-            else { targetVelocity = new Vector2(moveInput.x, 0f) * MoveStats.MaxWalkSpeed; }
-            _moveVelocity = Vector2.Lerp(_moveVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
-            _rb.linearVelocity = new Vector2(_moveVelocity.x, _rb.linearVelocity.y);
+
+            float maxSpeed = InputManager.RunIsHeld
+                ? MoveStats.MaxRunSpeed
+                : MoveStats.MaxWalkSpeed;
+
+            targetSpeed = moveInput.x * maxSpeed;
+
+            _moveSpeed = Mathf.Lerp(
+                _moveSpeed,
+                targetSpeed,
+                acceleration * Time.fixedDeltaTime
+            );
         }
-        else if (moveInput == Vector2.zero) 
+        else
         {
-            _moveVelocity = Vector2.Lerp(_moveVelocity, Vector2.zero, deceleration * Time.fixedDeltaTime);
-            _rb.linearVelocity = new Vector2(_moveVelocity.x, _rb.linearVelocity.y);
+            _moveSpeed = Mathf.Lerp(
+                _moveSpeed,
+                0f,
+                deceleration * Time.fixedDeltaTime
+            );
         }
+
+        ApplyVelocity();
+    }
+
+    private void ApplyVelocity()
+    {
+        Vector2 movementVelocity = MoveDirection * _moveSpeed;
+
+        Vector2 verticalVelocity = UpDirection * VerticalVelocity;
+
+        _rb.linearVelocity = movementVelocity + verticalVelocity;
     }
 
     private void TurnCheck(Vector2 moveInput) 
@@ -108,33 +138,95 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void IsGrounded() 
+    private void IsGrounded()
     {
-        Vector2 boxCastOrigin = new Vector2(_feetColl.bounds.center.x, _feetColl.bounds.min.y);
-        Vector2 boxCastSize = new Vector2(_feetColl.bounds.size.x, MoveStats.GroundDetectionRayLength);
+        Vector2 boxCastOrigin =
+            GetColliderEdge(_feetColl, GravityDirection);
 
-        _groundHit = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.down, MoveStats.GroundDetectionRayLength, MoveStats.GroundLayer);
-        if (_groundHit.collider != null)
+        Vector2 boxCastSize;
+
+        // Floor / ceiling
+        if (GravityDirection == Vector2.down ||
+            GravityDirection == Vector2.up)
         {
-            _isGrounded = true;
+            boxCastSize = new Vector2(
+                _feetColl.bounds.size.x,
+                MoveStats.GroundDetectionRayLength
+            );
         }
-        else 
+
+        // Left / right wall
+        else
         {
-            _isGrounded= false;
+            boxCastSize = new Vector2(
+                MoveStats.GroundDetectionRayLength,
+                _feetColl.bounds.size.y
+            );
         }
+
+        _groundHit = Physics2D.BoxCast(
+            boxCastOrigin,
+            boxCastSize,
+            0f,
+            GravityDirection,
+            MoveStats.GroundDetectionRayLength,
+            MoveStats.GroundLayer
+        );
+
+        _isGrounded = _groundHit.collider != null;
     }
+    private Vector2 GetColliderEdge(Collider2D coll, Vector2 direction)
+    {
+        Bounds bounds = coll.bounds;
+        Vector2 point = bounds.center;
 
+        if (direction == Vector2.down)
+            point.y = bounds.min.y;
+
+        else if (direction == Vector2.up)
+            point.y = bounds.max.y;
+
+        else if (direction == Vector2.left)
+            point.x = bounds.min.x;
+
+        else if (direction == Vector2.right)
+            point.x = bounds.max.x;
+
+        return point;
+    }
     private void BumpedHead()
     {
-        Vector2 boxCastOrigin = new Vector2(_feetColl.bounds.center.x, _bodyColl.bounds.max.y);
-        Vector2 boxCastSize = new Vector2(_feetColl.bounds.size.x * MoveStats.HeadWidth, MoveStats.HeadDetectionRayLength);
+        Vector2 boxCastOrigin =
+            GetColliderEdge(_bodyColl, UpDirection);
 
-        _headHit = Physics2D.BoxCast(boxCastOrigin, boxCastSize, 0f, Vector2.up, MoveStats.HeadDetectionRayLength, MoveStats.GroundLayer);
-        if (_headHit.collider != null)
+        Vector2 boxCastSize;
+
+        if (GravityDirection == Vector2.down ||
+            GravityDirection == Vector2.up)
         {
-            _bumpedHead = true;
+            boxCastSize = new Vector2(
+                _bodyColl.bounds.size.x * MoveStats.HeadWidth,
+                MoveStats.HeadDetectionRayLength
+            );
         }
-        else { _bumpedHead = false; }
+        else
+        {
+            boxCastSize = new Vector2(
+                MoveStats.HeadDetectionRayLength,
+                _bodyColl.bounds.size.y * MoveStats.HeadWidth
+            );
+        }
+
+        _headHit = Physics2D.BoxCast(
+            boxCastOrigin,
+            boxCastSize,
+            0f,
+            UpDirection,
+            MoveStats.HeadDetectionRayLength,
+            MoveStats.GroundLayer
+        );
+
+        _bumpedHead = _headHit.collider != null;
     }
     private void CollisionChecks() 
     {
@@ -315,7 +407,7 @@ public class PlayerMovement : MonoBehaviour
         //clamp fall speed
         VerticalVelocity = Mathf.Clamp(VerticalVelocity, -MoveStats.MaxFallSpeed, 50f);
 
-        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, VerticalVelocity);
+       // _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, VerticalVelocity);
 
     }
 
@@ -329,6 +421,24 @@ public class PlayerMovement : MonoBehaviour
         else { _cototeTimer = MoveStats.JumpCoyoteTime; }
     }
 
+    public void SetGravity(Vector2 direction)
+    {
+        direction.Normalize();
+
+        if (GravityDirection == direction)
+            return;
+
+        GravityDirection = direction;
+
+        RotateToGravity();
+    }
+
+    private void RotateToGravity()
+    {
+        float angle = Vector2.SignedAngle(Vector2.down, GravityDirection);
+
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+    }
 
     private void DrawJumpArc(float moveSpeed, Color gizmoColor)
     {

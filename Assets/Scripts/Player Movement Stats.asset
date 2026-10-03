@@ -38,8 +38,8 @@ MonoBehaviour:
   DebugShowIsGroundedBox: 1
   DebugShowHeadBumpBox: 1
   ShowWalkJumpArc: 1
-  ShowRunJumpArc: 1
+  ShowRunJumpArc: 0
   StopOnCollision: 1
-  DrawRight: 1
+  DrawRight: 0
   ArcResolution: 20
   VisualizationSteps: 90
