@@ -50,6 +50,17 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "",
+                    "id": "63aec576-d304-47cf-9821-0b056a17a9f3",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
                     "name": "wasd",
                     "id": "06fb15e6-7d52-4619-9755-140c8e6aef86",
                     "path": "2DVector",
@@ -163,6 +174,17 @@
                     "name": "",
                     "id": "31db1967-1698-4a1d-93bf-34784cbf99aa",
                     "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Run",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f71718c-a97d-4dca-a6dc-c189dd617a76",
+                    "path": "<Keyboard>/z",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
