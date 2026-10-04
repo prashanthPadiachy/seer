@@ -34,7 +34,7 @@ MonoBehaviour:
   ApexThreshold: 0.97
   ApexHangTime: 0.075
   JumpBufferTime: 0.125
-  JumpCoyoteTime: 0.1
+  JumpCoyoteTime: 0.051
   DebugShowIsGroundedBox: 1
   DebugShowHeadBumpBox: 1
   ShowWalkJumpArc: 1

@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class PlayerRespawn : MonoBehaviour
 {
-    [SerializeField] private Transform respawnPoint;
+    [SerializeField] private Transform startingRespawnPoint;
     [SerializeField] private ParticleSystem deathParticles;
+
 
     [Header("Respawn")]
     [SerializeField] private float respawnDelay = 0.5f;
@@ -14,11 +15,18 @@ public class PlayerRespawn : MonoBehaviour
     private PlayerMovement playerMovement;
 
     private bool isRespawning;
+    private Vector3 respawnPosition;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
+        respawnPosition = startingRespawnPoint.position;
+    }
+
+    public void SetCheckpoint(Vector3 newPosition)
+    {
+        respawnPosition = newPosition;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -27,6 +35,8 @@ public class PlayerRespawn : MonoBehaviour
         {
             StartCoroutine(Respawn());
         }
+
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -68,7 +78,7 @@ public class PlayerRespawn : MonoBehaviour
         yield return new WaitForSeconds(respawnDelay);
 
         // Reset position and gravity
-        transform.position = respawnPoint.position;
+        transform.position = respawnPosition;
         playerMovement.SetGravity(Vector2.down);
 
         rb.linearVelocity = Vector2.zero;
