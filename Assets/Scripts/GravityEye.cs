@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GravityEye : MonoBehaviour
@@ -11,25 +12,32 @@ public class GravityEye : MonoBehaviour
     }
 
     [SerializeField] private EyeGravityDirection gravityDirection;
+    [SerializeField] private float exitDelay = 0.1f;
+
+    private Coroutine exitCoroutine;
+
+    private HashSet<Collider2D> playerCollidersInside = new HashSet<Collider2D>();
+
+    private PlayerMovement currentPlayer;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        PlayerMovement player = collision.GetComponentInParent<PlayerMovement>();
+        PlayerMovement player =
+            collision.GetComponentInParent<PlayerMovement>();
 
         if (player == null)
             return;
 
-        Vector2 direction = gravityDirection switch
+        playerCollidersInside.Add(collision);
+        currentPlayer = player;
+
+        if (exitCoroutine != null)
         {
-            EyeGravityDirection.Down => Vector2.down,
-            EyeGravityDirection.Up => Vector2.up,
-            EyeGravityDirection.Left => Vector2.left,
-            EyeGravityDirection.Right => Vector2.right,
+            StopCoroutine(exitCoroutine);
+            exitCoroutine = null;
+        }
 
-            _ => Vector2.down
-        };
-
-        player.SetGravity(direction);
+        player.SetGravity(GetGravityDirection(), transform.position);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -40,6 +48,36 @@ public class GravityEye : MonoBehaviour
         if (player == null)
             return;
 
-        player.SetGravity(Vector2.down);
+        playerCollidersInside.Remove(collision);
+
+        if (playerCollidersInside.Count == 0)
+        {
+            exitCoroutine = StartCoroutine(ResetGravityAfterDelay(player));
+        }
+    }
+
+    private System.Collections.IEnumerator ResetGravityAfterDelay(
+    PlayerMovement player)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (playerCollidersInside.Count == 0)
+        {
+            player.SetGravity(Vector2.down, transform.position);
+            currentPlayer = null;
+        }
+
+        exitCoroutine = null;
+    }
+    private Vector2 GetGravityDirection()
+    {
+        return gravityDirection switch
+        {
+            EyeGravityDirection.Down => Vector2.down,
+            EyeGravityDirection.Up => Vector2.up,
+            EyeGravityDirection.Left => Vector2.left,
+            EyeGravityDirection.Right => Vector2.right,
+            _ => Vector2.down
+        };
     }
 }

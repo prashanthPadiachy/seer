@@ -79,7 +79,7 @@ public class PlayerRespawn : MonoBehaviour
 
         // Reset position and gravity
         transform.position = respawnPosition;
-        playerMovement.SetGravity(Vector2.down);
+        playerMovement.SetGravity(Vector2.down, transform.position);
 
         rb.linearVelocity = Vector2.zero;
 

@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     public PlayerMovementStats MoveStats;
-    [SerializeField] private Collider2D _feetColl;
+    [SerializeField] private BoxCollider2D _feetColl;
     [SerializeField] private Collider2D _bodyColl;
 
     private Rigidbody2D _rb;
@@ -49,6 +49,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private Animator _animator;
     [SerializeField] private SpriteRenderer _visuals;
+
+    [SerializeField] private float gravitySwitchClearance = 0.15f;
     private void Awake()
     {
         _isFacingRight = true;
@@ -66,6 +68,21 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         CollisionChecks();
+
+        //landing
+        if ((_isJumping || _isFalling) && _isGrounded && VerticalVelocity <= 0f)
+        {
+            _isJumping = false;
+            _isFalling = false;
+            _isFastFalling = false;
+            _fastFallTime = 0f;
+            _isPastApexThreshold = false;
+            _numberOfJumpsUsed = 0;
+
+            //VerticalVelocity = Physics2D.gravity.y;
+            VerticalVelocity = 0f;
+        }
+
         Jump();
 
         if (_isGrounded)
@@ -161,34 +178,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void IsGrounded()
     {
-        Vector2 boxCastOrigin =
-            GetColliderEdge(_feetColl, GravityDirection);
+        // Actual world-space centre of the child BoxCollider2D
+        Vector2 origin = _feetColl.transform.TransformPoint(_feetColl.offset);
 
-        Vector2 boxCastSize;
+        // Actual collider size including scale
+        Vector2 size = Vector2.Scale(
+            _feetColl.size,
+            new Vector2(
+                Mathf.Abs(_feetColl.transform.lossyScale.x),
+                Mathf.Abs(_feetColl.transform.lossyScale.y)
+            )
+        );
 
-        // Floor / ceiling
-        if (GravityDirection == Vector2.down ||
-            GravityDirection == Vector2.up)
-        {
-            boxCastSize = new Vector2(
-                _feetColl.bounds.size.x,
-                MoveStats.GroundDetectionRayLength
-            );
-        }
+        // Make the cast very slightly narrower than the actual feet collider
+        // so touching a wall beside the player doesn't count as ground.
+        size *= 0.9f;
 
-        // Left / right wall
-        else
-        {
-            boxCastSize = new Vector2(
-                MoveStats.GroundDetectionRayLength,
-                _feetColl.bounds.size.y
-            );
-        }
+        float angle = _feetColl.transform.eulerAngles.z;
 
         _groundHit = Physics2D.BoxCast(
-            boxCastOrigin,
-            boxCastSize,
-            0f,
+            origin,
+            size,
+            angle,
             GravityDirection,
             MoveStats.GroundDetectionRayLength,
             MoveStats.GroundLayer
@@ -314,18 +325,7 @@ public class PlayerMovement : MonoBehaviour
             _isFastFalling= false;
         }
 
-        //landing
-        if ((_isJumping || _isFalling) && _isGrounded && VerticalVelocity < 0f) 
-        {
-            _isJumping = false;
-            _isFalling = false;
-            _isFastFalling = false;
-            _fastFallTime = 0f;
-            _isPastApexThreshold = false;
-            _numberOfJumpsUsed = 0;
 
-            VerticalVelocity = Physics2D.gravity.y;
-        }
 
 
 
@@ -442,7 +442,7 @@ public class PlayerMovement : MonoBehaviour
         else { _cototeTimer = MoveStats.JumpCoyoteTime; }
     }
 
-    public void SetGravity(Vector2 direction)
+    public void SetGravity(Vector2 direction, Vector2 eyePosition)
     {
         direction.Normalize();
 
@@ -451,14 +451,63 @@ public class PlayerMovement : MonoBehaviour
 
         GravityDirection = direction;
 
+        VerticalVelocity = 0f;
+
         RotateToGravity();
+
+        Vector2 offsetDirection = Vector2.zero;
+
+        // Vertical gravity
+        if (GravityDirection == Vector2.down ||
+            GravityDirection == Vector2.up)
+        {
+            // Only offset if player is BELOW the eye
+            if (transform.position.y < eyePosition.y)
+            {
+                offsetDirection = Vector2.up;
+            }
+        }
+        // Horizontal gravity
+        else
+        {
+            if (transform.position.x > eyePosition.x)
+            {
+                offsetDirection = Vector2.right;
+            }
+            else
+            {
+                offsetDirection = Vector2.left;
+            }
+        }
+
+        _rb.position += offsetDirection * gravitySwitchClearance;
+
+        Physics2D.SyncTransforms();
+
+        CollisionChecks();
+
+        if (_isGrounded)
+        {
+            _isJumping = false;
+            _isFalling = false;
+            _isFastFalling = false;
+            _fastFallTime = 0f;
+            _isPastApexThreshold = false;
+            _numberOfJumpsUsed = 0;
+
+            //VerticalVelocity = Physics2D.gravity.y;
+            VerticalVelocity = 0f;
+        }
     }
 
     private void RotateToGravity()
     {
-        float angle = Vector2.SignedAngle(Vector2.down, GravityDirection);
+        float angle = Vector2.SignedAngle(
+            Vector2.down,
+            GravityDirection
+        );
 
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        _rb.rotation = angle;
     }
 
     private void DrawJumpArc(float moveSpeed, Color gizmoColor)
