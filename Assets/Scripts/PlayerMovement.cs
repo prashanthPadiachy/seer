@@ -132,14 +132,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void TurnCheck(Vector2 moveInput) 
     {
-        Debug.Log("MI  " + moveInput);
+       // Debug.Log("MI  " + moveInput);
         if (_isFacingRight && moveInput.x < 0) 
         {
-            Debug.Log("going left");
+           // Debug.Log("going left");
             Turn(false);
         } else if (!_isFacingRight && moveInput.x > 0)
         {
-            Debug.Log("going right");
+           // Debug.Log("going right");
             Turn(true);
             
         }

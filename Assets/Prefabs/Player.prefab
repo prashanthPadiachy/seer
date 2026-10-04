@@ -158,6 +158,7 @@ GameObject:
   - component: {fileID: 2649924097122825225}
   - component: {fileID: 6078832426181263180}
   - component: {fileID: 7216574025301736422}
+  - component: {fileID: 5440875125778595492}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -226,6 +227,22 @@ MonoBehaviour:
   _bodyColl: {fileID: 3247910008001369117}
   _animator: {fileID: 4271057864300463979}
   _visuals: {fileID: 1804488383491922503}
+--- !u!114 &5440875125778595492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8534605490958483402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11fd0afa0ff34de49bb6e1f5ab16ae1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
+  respawnPoint: {fileID: 0}
+  deathParticles: {fileID: 406738816290800868, guid: 46a2ea7b79393ea4db1c9a3af113cbc7, type: 3}
+  respawnDelay: 0.7
+  playerVisuals: {fileID: 5469567806894120395}
 --- !u!1 &9209413050814736970
 GameObject:
   m_ObjectHideFlags: 0
@@ -349,5 +366,10 @@ Animator:
 --- !u!4 &5046904054275487150 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7878350319992209165, guid: 0f047bc6568413b4fa7a8dfd54e5246b, type: 3}
+  m_PrefabInstance: {fileID: 3125411969413794467}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5469567806894120395 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2253911629886400664, guid: 0f047bc6568413b4fa7a8dfd54e5246b, type: 3}
   m_PrefabInstance: {fileID: 3125411969413794467}
   m_PrefabAsset: {fileID: 0}
