@@ -46,6 +46,9 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 MoveDirection =>
         new Vector2(-GravityDirection.y, GravityDirection.x);
+
+    [SerializeField] private Animator _animator;
+    [SerializeField] private SpriteRenderer _visuals;
     private void Awake()
     {
         _isFacingRight = true;
@@ -57,6 +60,8 @@ public class PlayerMovement : MonoBehaviour
     {
         CountTimers();
         JumpChecks();
+
+        updateAnimations();
     }
     private void FixedUpdate()
     {
@@ -113,14 +118,30 @@ public class PlayerMovement : MonoBehaviour
         _rb.linearVelocity = movementVelocity + verticalVelocity;
     }
 
+    private void updateAnimations() 
+    {
+        float movementSpeed =
+           Mathf.Abs(Vector2.Dot(_rb.linearVelocity, MoveDirection));
+
+        float normalizedSpeed =
+            movementSpeed / MoveStats.MaxRunSpeed;
+
+        _animator.SetFloat("Speed", normalizedSpeed);
+        _animator.SetBool("IsGrounded", _isGrounded);
+    }
+
     private void TurnCheck(Vector2 moveInput) 
     {
+        Debug.Log("MI  " + moveInput);
         if (_isFacingRight && moveInput.x < 0) 
         {
+            Debug.Log("going left");
             Turn(false);
-        } else if (_isFacingRight && moveInput.x < 0)
+        } else if (!_isFacingRight && moveInput.x > 0)
         {
+            Debug.Log("going right");
             Turn(true);
+            
         }
     }
 
@@ -129,12 +150,12 @@ public class PlayerMovement : MonoBehaviour
         if (turnR)
         {
             _isFacingRight = true;
-            transform.Rotate(0f, 180f, 0f);
+            _visuals.flipX = false;
         }
         else 
         {
             _isFacingRight = false;
-            transform.Rotate(0f, -180f, 0f);
+            _visuals.flipX = true;
         }
     }
 
