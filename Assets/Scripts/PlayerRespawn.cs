@@ -29,6 +29,14 @@ public class PlayerRespawn : MonoBehaviour
         respawnPosition = startingRespawnPoint.position;
     }
 
+    private void Update()
+    {
+        if (InputManager.RestartWasPressed && !isRespawning)
+        {
+            StartCoroutine(Respawn());
+        }
+    }
+
     public void SetCheckpoint(Vector3 newPosition)
     {
         respawnPosition = newPosition;
