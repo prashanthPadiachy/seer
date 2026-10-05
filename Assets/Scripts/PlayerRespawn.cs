@@ -5,7 +5,7 @@ public class PlayerRespawn : MonoBehaviour
 {
     [SerializeField] private Transform startingRespawnPoint;
     [SerializeField] private ParticleSystem deathParticles;
-
+    [SerializeField] private CameraController cameraController;
 
     [Header("Respawn")]
     [SerializeField] private float respawnDelay = 0.5f;
@@ -16,6 +16,8 @@ public class PlayerRespawn : MonoBehaviour
 
     private bool isRespawning;
     private Vector3 respawnPosition;
+
+   
 
     private void Awake()
     {
@@ -58,13 +60,17 @@ public class PlayerRespawn : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         playerMovement.enabled = false;
 
-        // Play particle effect where player died
         if (deathParticles != null)
         {
-            Instantiate(
+            ParticleSystem particles = Instantiate(
                 deathParticles,
                 transform.position,
                 Quaternion.identity
+            );
+
+            Destroy(
+                particles.gameObject,
+                particles.main.duration + particles.main.startLifetime.constantMax
             );
         }
 
@@ -83,6 +89,7 @@ public class PlayerRespawn : MonoBehaviour
 
         rb.linearVelocity = Vector2.zero;
 
+        cameraController.SnapToTarget();
         // Show player again
         if (playerVisuals != null)
         {

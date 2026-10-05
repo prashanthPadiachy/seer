@@ -45,4 +45,14 @@ public class CameraController : MonoBehaviour
             followSpeed * Time.deltaTime
         );
     }
+    public void SnapToTarget()
+    {
+        targetCameraY = target.position.y + yOffset;
+
+        transform.position = new Vector3(
+            target.position.x,
+            targetCameraY,
+            -10f
+        );
+    }
 }
