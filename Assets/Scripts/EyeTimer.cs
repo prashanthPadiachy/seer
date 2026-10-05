@@ -18,6 +18,10 @@ public class EyeTimer : MonoBehaviour
     [SerializeField] private float startDelay = 0f;
     [SerializeField] private bool startActive = true;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip toggleSound;
+
     private bool isActive;
 
     private IEnumerator Start()
@@ -45,6 +49,12 @@ public class EyeTimer : MonoBehaviour
     private void SetEyeActive(bool active)
     {
         isActive = active;
+
+        // Play sound when opening or closing
+        if (audioSource != null && toggleSound != null)
+        {
+            audioSource.PlayOneShot(toggleSound);
+        }
 
         // Change sprite
         eyeSprite.sprite = active ? openSprite : closedSprite;
