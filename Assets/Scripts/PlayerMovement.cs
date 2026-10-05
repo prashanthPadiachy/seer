@@ -113,13 +113,23 @@ public class PlayerMovement : MonoBehaviour
 
         if (moveInput != Vector2.zero)
         {
-            TurnCheck(moveInput);
+            //TurnCheck(moveInput);
+
+            float horizontalInput = moveInput.x;
+
+            Vector2 adjustedInput = new Vector2(horizontalInput, moveInput.y);
+            TurnCheck(adjustedInput);
+
+            if (GravityDirection == Vector2.up)
+            {
+                horizontalInput *= -1f;
+            }
 
             float maxSpeed = InputManager.RunIsHeld
                 ? MoveStats.MaxRunSpeed
                 : MoveStats.MaxWalkSpeed;
 
-            targetSpeed = moveInput.x * maxSpeed;
+             targetSpeed = horizontalInput * maxSpeed;
 
             _moveSpeed = Mathf.Lerp(
                 _moveSpeed,
