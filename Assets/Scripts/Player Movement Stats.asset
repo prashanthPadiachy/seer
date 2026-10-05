@@ -24,7 +24,7 @@ MonoBehaviour:
   GroundDetectionRayLength: 0.08
   HeadDetectionRayLength: 0.02
   HeadWidth: 0.75
-  JumpHeight: 6.5
+  JumpHeight: 5.5
   JumpHeightCompensationFactor: 1.054
   TimeTillJumpApex: 0.35
   GravityOnReleaseMultiplier: 1
