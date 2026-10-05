@@ -51,6 +51,18 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private SpriteRenderer _visuals;
 
     [SerializeField] private float gravitySwitchClearance = 0.15f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private AudioClip walkSound;
+    [SerializeField] private AudioClip runSound;
+    [SerializeField] private AudioClip jumpSound;
+
+    [SerializeField] private float walkStepInterval = 0.4f;
+    [SerializeField] private float runStepInterval = 0.25f;
+
+    private float footstepTimer;
     private void Awake()
     {
         _isFacingRight = true;
@@ -64,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         JumpChecks();
 
         updateAnimations();
+        HandleFootsteps();
     }
     private void FixedUpdate()
     {
@@ -145,6 +158,32 @@ public class PlayerMovement : MonoBehaviour
 
         _animator.SetFloat("Speed", normalizedSpeed);
         _animator.SetBool("IsGrounded", _isGrounded);
+    }
+
+    private void HandleFootsteps()
+    {
+        // Not on the ground or not moving
+        if (!_isGrounded || Mathf.Abs(InputManager.Movement.x) < 0.1f)
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        footstepTimer -= Time.deltaTime;
+
+        if (footstepTimer <= 0f)
+        {
+            if (InputManager.RunIsHeld)
+            {
+                audioSource.PlayOneShot(runSound);
+                footstepTimer = runStepInterval;
+            }
+            else
+            {
+                audioSource.PlayOneShot(walkSound);
+                footstepTimer = walkStepInterval;
+            }
+        }
     }
 
     private void TurnCheck(Vector2 moveInput) 
@@ -339,6 +378,11 @@ public class PlayerMovement : MonoBehaviour
         _jumpBufferTimer = 0f;
         _numberOfJumpsUsed += numberOfJumpsUsed;
         VerticalVelocity = MoveStats.InitialJumpVelocity;
+
+        if (jumpSound != null)
+        {
+            audioSource.PlayOneShot(jumpSound);
+        }
     }
     private void Jump()
     {

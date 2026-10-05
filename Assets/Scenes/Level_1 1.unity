@@ -112715,7 +112715,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6734395809546719096, guid: eb50df2c66db7ac43b61e4d8a26abf3c, type: 3}
       propertyPath: orthographic size
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7531817279801086088, guid: eb50df2c66db7ac43b61e4d8a26abf3c, type: 3}
       propertyPath: m_Name
@@ -112727,11 +112727,11 @@ PrefabInstance:
       objectReference: {fileID: 1928468985}
     - target: {fileID: 7800912962619486714, guid: eb50df2c66db7ac43b61e4d8a26abf3c, type: 3}
       propertyPath: yOffset
-      value: 3
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 7800912962619486714, guid: eb50df2c66db7ac43b61e4d8a26abf3c, type: 3}
       propertyPath: yDeadzone
-      value: 3
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7800912962619486714, guid: eb50df2c66db7ac43b61e4d8a26abf3c, type: 3}
       propertyPath: followSpeed

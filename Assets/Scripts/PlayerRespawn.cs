@@ -16,8 +16,11 @@ public class PlayerRespawn : MonoBehaviour
 
     private bool isRespawning;
     private Vector3 respawnPosition;
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip deathSound;
 
-   
+
 
     private void Awake()
     {
@@ -55,6 +58,11 @@ public class PlayerRespawn : MonoBehaviour
             yield break;
 
         isRespawning = true;
+
+        if (deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
 
         // Stop player movement
         rb.linearVelocity = Vector2.zero;
