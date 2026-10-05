@@ -41,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
     private float _moveSpeed;
 
     public Vector2 GravityDirection { get; private set; } = Vector2.down;
+    private GravityEye currentGravityEye;
 
     private Vector2 UpDirection => -GravityDirection;
 
@@ -503,38 +504,50 @@ public class PlayerMovement : MonoBehaviour
         if (GravityDirection == direction)
             return;
 
+        Vector2 oldGravity = GravityDirection;
+
         GravityDirection = direction;
 
         VerticalVelocity = 0f;
 
         RotateToGravity();
 
-        Vector2 offsetDirection = Vector2.zero;
+        // Only use clearance when entering/leaving normal gravity.
+        // Do NOT push the player when switching directly
+        // from one gravity eye to another.
+        bool switchingBetweenGravityEyes =
+            oldGravity != Vector2.down &&
+            GravityDirection != Vector2.down;
 
-        // Vertical gravity
-        if (GravityDirection == Vector2.down ||
-            GravityDirection == Vector2.up)
+        if (!switchingBetweenGravityEyes)
         {
-            // Only offset if player is BELOW the eye
-            if (transform.position.y < eyePosition.y)
+            Vector2 offsetDirection = Vector2.zero;
+
+            if (GravityDirection == Vector2.down ||
+                GravityDirection == Vector2.up)
             {
-                offsetDirection = Vector2.up;
-            }
-        }
-        // Horizontal gravity
-        else
-        {
-            if (transform.position.x > eyePosition.x)
-            {
-                offsetDirection = Vector2.right;
+                // Your existing rule:
+                // no offset if player is above the eye
+                if (transform.position.y < eyePosition.y)
+                {
+                    offsetDirection = Vector2.up;
+                }
             }
             else
             {
-                offsetDirection = Vector2.left;
+                if (transform.position.x > eyePosition.x)
+                {
+                    offsetDirection = Vector2.right;
+                }
+                else
+                {
+                    offsetDirection = Vector2.left;
+                }
             }
-        }
 
-        _rb.position += offsetDirection * gravitySwitchClearance;
+            _rb.position +=
+                offsetDirection * gravitySwitchClearance;
+        }
 
         Physics2D.SyncTransforms();
 
@@ -562,6 +575,27 @@ public class PlayerMovement : MonoBehaviour
         );
 
         _rb.rotation = angle;
+    }
+
+    public void SetGravityFromEye(
+    GravityEye eye,
+    Vector2 direction,
+    Vector2 eyePosition)
+    {
+        currentGravityEye = eye;
+
+        SetGravity(direction, eyePosition);
+    }
+
+    public void ExitGravityEye(GravityEye eye, Vector2 eyePosition)
+    {
+        // Only reset gravity if THIS is still the active eye
+        if (currentGravityEye != eye)
+            return;
+
+        currentGravityEye = null;
+
+        SetGravity(Vector2.down, eyePosition);
     }
 
     private void DrawJumpArc(float moveSpeed, Color gizmoColor)

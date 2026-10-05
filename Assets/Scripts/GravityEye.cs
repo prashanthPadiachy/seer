@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +17,8 @@ public class GravityEye : MonoBehaviour
 
     private Coroutine exitCoroutine;
 
-    private HashSet<Collider2D> playerCollidersInside = new HashSet<Collider2D>();
+    private HashSet<Collider2D> playerCollidersInside =
+        new HashSet<Collider2D>();
 
     private PlayerMovement currentPlayer;
 
@@ -31,13 +33,19 @@ public class GravityEye : MonoBehaviour
         playerCollidersInside.Add(collision);
         currentPlayer = player;
 
+        // Cancel pending exit if player came back in
         if (exitCoroutine != null)
         {
             StopCoroutine(exitCoroutine);
             exitCoroutine = null;
         }
 
-        player.SetGravity(GetGravityDirection(), transform.position);
+        // Tell the player THIS eye now owns gravity
+        player.SetGravityFromEye(
+            this,
+            GetGravityDirection(),
+            transform.position
+        );
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -50,25 +58,33 @@ public class GravityEye : MonoBehaviour
 
         playerCollidersInside.Remove(collision);
 
+        // Only start leaving once every player collider is out
         if (playerCollidersInside.Count == 0)
         {
-            exitCoroutine = StartCoroutine(ResetGravityAfterDelay(player));
+            exitCoroutine =
+                StartCoroutine(ResetGravityAfterDelay(player));
         }
     }
 
-    private System.Collections.IEnumerator ResetGravityAfterDelay(
-    PlayerMovement player)
+    private IEnumerator ResetGravityAfterDelay(PlayerMovement player)
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(exitDelay);
 
         if (playerCollidersInside.Count == 0)
         {
-            player.SetGravity(Vector2.down, transform.position);
+            // Only resets gravity if THIS eye is still
+            // the player's currently active gravity eye
+            player.ExitGravityEye(
+                this,
+                transform.position
+            );
+
             currentPlayer = null;
         }
 
         exitCoroutine = null;
     }
+
     private Vector2 GetGravityDirection()
     {
         return gravityDirection switch
@@ -83,9 +99,18 @@ public class GravityEye : MonoBehaviour
 
     private void OnDisable()
     {
+        if (exitCoroutine != null)
+        {
+            StopCoroutine(exitCoroutine);
+            exitCoroutine = null;
+        }
+
         if (currentPlayer != null)
         {
-            currentPlayer.SetGravity(Vector2.down, transform.position);
+            currentPlayer.ExitGravityEye(
+                this,
+                transform.position
+            );
         }
 
         playerCollidersInside.Clear();
