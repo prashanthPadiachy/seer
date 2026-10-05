@@ -80,4 +80,15 @@ public class GravityEye : MonoBehaviour
             _ => Vector2.down
         };
     }
+
+    private void OnDisable()
+    {
+        if (currentPlayer != null)
+        {
+            currentPlayer.SetGravity(Vector2.down, transform.position);
+        }
+
+        playerCollidersInside.Clear();
+        currentPlayer = null;
+    }
 }

@@ -1401,8 +1401,52 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2398417188551933063, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 562170395911467867}
   m_SourcePrefab: {fileID: 100100000, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+--- !u!1 &562170395911467863 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2398417188551933063, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+  m_PrefabInstance: {fileID: 562170395911467862}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &562170395911467864 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4844450581257592126, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+  m_PrefabInstance: {fileID: 562170395911467862}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &562170395911467865 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4934568156724251205, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+  m_PrefabInstance: {fileID: 562170395911467862}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &562170395911467866 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 919887084340591990, guid: 0995ff4e15937f14e8a95403ab59677d, type: 3}
+  m_PrefabInstance: {fileID: 562170395911467862}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &562170395911467867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562170395911467863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fbe443880f31324193074ef92a5eb71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EyeTimer
+  eyeSprite: {fileID: 562170395911467866}
+  openSprite: {fileID: -4104013783007261159, guid: 17bb3b8f736cf654ca35959a79ded851, type: 3}
+  closedSprite: {fileID: 9011662500707189115, guid: f82e66ad1992dd547845fcc9b9fe142b, type: 3}
+  innerEye: {fileID: 562170395911467865}
+  zone: {fileID: 562170395911467864}
+  activeTime: 3
+  inactiveTime: 2
+  startDelay: 0
+  startActive: 1
 --- !u!1001 &5109806815252715320
 PrefabInstance:
   m_ObjectHideFlags: 0
